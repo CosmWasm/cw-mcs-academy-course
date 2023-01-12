@@ -1,0 +1,15 @@
+[package]
+name = "proxy"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+cosmwasm-std = "1.1.9"
+serde = "1.0.152"
+cw-storage-plus = "1.0.1"
+schemars = "0.8.11"
+cosmwasm-schema = "1.1.9"
+thiserror = "1.0.38"
