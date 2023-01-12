@@ -22,7 +22,7 @@ pub fn instantiate(
 
     OWNER.save(deps.storage, &owner)?;
     WEIGHT.save(deps.storage, &msg.weight)?;
-    DONATIONS.save(deps.storage, &0)?;
+    DONATIONS.save(deps.storage, &1)?;
     CONFIG.save(
         deps.storage,
         &Config {
@@ -48,7 +48,7 @@ pub fn execute(
     use ExecMsg::*;
 
     match msg {
-        Donate {} => exec::donate(deps),
+        Donate {} => exec::donate(deps, info),
         Withdraw { receiver, amount } => exec::withdraw(deps, receiver, amount),
         Close {} => exec::close(deps, info),
         ProposeMember { addr } => exec::propose_member(deps, addr),

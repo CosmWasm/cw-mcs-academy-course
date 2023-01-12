@@ -1,10 +1,37 @@
-use cosmwasm_std::{ensure, DepsMut, Env, MessageInfo, Response, StdResult, Uint128};
+use cosmwasm_std::{
+    coins, ensure, to_binary, DepsMut, Env, MessageInfo, Response, StdResult, Uint128, WasmMsg,
+};
+use cw_utils::must_pay;
 
 use crate::error::ContractError;
-use crate::state::{CONFIG, OWNER};
+use crate::msg::DistribtionExecMsg;
+use crate::state::{CONFIG, DONATIONS, OWNER};
 
-pub fn donate(deps: DepsMut) -> Result<Response, ContractError> {
-    unimplemented!()
+pub fn donate(deps: DepsMut, info: MessageInfo) -> Result<Response, ContractError> {
+    let config = CONFIG.load(deps.storage)?;
+    let amount = must_pay(&info, &config.denom)?;
+
+    let direct_amount = config.direct_part * amount;
+    let to_distribute = amount - direct_amount;
+
+    let distribution_msg = DistribtionExecMsg::Distribute {};
+    let distribution_msg = WasmMsg::Execute {
+        contract_addr: config.distribution_contract.into_string(),
+        msg: to_binary(&distribution_msg)?,
+        funds: coins(to_distribute.u128(), &config.denom),
+    };
+
+    let resp = Response::new()
+        .add_message(distribution_msg)
+        .add_attribute("action", "donate")
+        .add_attribute("sender", info.sender.as_str())
+        .add_attribute("amount", amount.to_string());
+
+    DONATIONS.update(deps.storage, |donations| -> StdResult<_> {
+        Ok(donations + 1)
+    })?;
+
+    Ok(resp)
 }
 
 pub fn withdraw(
