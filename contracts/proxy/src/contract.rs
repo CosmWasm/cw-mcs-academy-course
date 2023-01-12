@@ -1,10 +1,13 @@
-use cosmwasm_std::{ensure, Decimal, DepsMut, Env, MessageInfo, Response};
+use cosmwasm_std::{ensure, Decimal, DepsMut, Env, MessageInfo, Reply, Response};
 
 use crate::error::ContractError;
 use crate::msg::{ExecMsg, InstantiateMsg};
 use crate::state::{Config, CONFIG, DONATIONS, HALFTIME, LAST_UPDATED, OWNER, WEIGHT};
 
 mod exec;
+mod reply;
+
+const WITHDRAW_REPLY_ID: u64 = 1;
 
 pub fn instantiate(
     deps: DepsMut,
@@ -49,9 +52,16 @@ pub fn execute(
 
     match msg {
         Donate {} => exec::donate(deps, info),
-        Withdraw { receiver, amount } => exec::withdraw(deps, receiver, amount),
+        Withdraw { receiver, amount } => exec::withdraw(deps, env, info, receiver, amount),
         Close {} => exec::close(deps, info),
         ProposeMember { addr } => exec::propose_member(deps, info, addr),
         UpdateWeight {} => exec::update_weight(deps, env, info),
+    }
+}
+
+pub fn reply(deps: DepsMut, env: Env, reply: Reply) -> Result<Response, ContractError> {
+    match reply.id {
+        WITHDRAW_REPLY_ID => reply::withdraw(deps, env),
+        id => Err(ContractError::UnrecognizedReplyId(id)),
     }
 }

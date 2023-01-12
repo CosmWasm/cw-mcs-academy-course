@@ -12,4 +12,6 @@ pub enum ContractError {
     InalidDirectPart,
     #[error("Unauthorized")]
     Unauthorized,
+    #[error("Unrecognized reply id: {0}")]
+    UnrecognizedReplyId(u64),
 }
