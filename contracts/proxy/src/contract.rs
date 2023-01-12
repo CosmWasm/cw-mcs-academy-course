@@ -51,7 +51,7 @@ pub fn execute(
         Donate {} => exec::donate(deps, info),
         Withdraw { receiver, amount } => exec::withdraw(deps, receiver, amount),
         Close {} => exec::close(deps, info),
-        ProposeMember { addr } => exec::propose_member(deps, addr),
-        UpdateWeight {} => exec::update_weight(deps, env),
+        ProposeMember { addr } => exec::propose_member(deps, info, addr),
+        UpdateWeight {} => exec::update_weight(deps, env, info),
     }
 }
