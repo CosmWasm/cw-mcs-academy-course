@@ -1,5 +1,5 @@
 [package]
-name = "proxy"
+name = "membership"
 version = "0.1.0"
 edition = "2021"
 
@@ -16,4 +16,3 @@ cw-storage-plus = "1.0.1"
 schemars = "0.8.11"
 cosmwasm-schema = "1.1.9"
 thiserror = "1.0.38"
-cw-utils = "1.0.1"
