@@ -39,7 +39,8 @@ pub fn instantiate(
     HALFTIME.save(deps.storage, &msg.halftime)?;
     LAST_UPDATED.save(deps.storage, &env.block.time.seconds())?;
 
-    Ok(Response::new())
+    let resp = Response::new();
+    Ok(resp)
 }
 
 pub fn execute(
