@@ -8,6 +8,7 @@ mod exec;
 mod reply;
 
 const WITHDRAW_REPLY_ID: u64 = 1;
+const PROPOSE_MEMBER_ID: u64 = 2;
 
 pub fn instantiate(
     deps: DepsMut,
@@ -63,6 +64,7 @@ pub fn execute(
 pub fn reply(deps: DepsMut, env: Env, reply: Reply) -> Result<Response, ContractError> {
     match reply.id {
         WITHDRAW_REPLY_ID => reply::withdraw(deps, env),
+        PROPOSE_MEMBER_ID => reply::propose_member(reply.result.into_result()),
         id => Err(ContractError::UnrecognizedReplyId(id)),
     }
 }

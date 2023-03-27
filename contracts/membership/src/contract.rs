@@ -12,6 +12,7 @@ mod exec;
 mod reply;
 
 const INITIAL_PROXY_INSTANTIATION_REPLY_ID: u64 = 1;
+const PROXY_INSTANTIATION_REPLY_ID: u64 = 2;
 
 pub fn instantiate(
     deps: DepsMut,
@@ -92,6 +93,7 @@ pub fn reply(deps: DepsMut, _env: Env, reply: Reply) -> Result<Response, Contrac
         INITIAL_PROXY_INSTANTIATION_REPLY_ID => {
             reply::initial_proxy_instantiated(deps, reply.result.into_result())
         }
+        PROXY_INSTANTIATION_REPLY_ID => reply::proxy_instantiated(deps, reply.result.into_result()),
         id => Err(ContractError::UnrecognizedReplyId(id)),
     }
 }

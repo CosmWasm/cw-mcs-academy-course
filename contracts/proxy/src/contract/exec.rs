@@ -4,7 +4,7 @@ use cosmwasm_std::{
 };
 use cw_utils::must_pay;
 
-use crate::contract::WITHDRAW_REPLY_ID;
+use crate::contract::{PROPOSE_MEMBER_ID, WITHDRAW_REPLY_ID};
 use crate::error::ContractError;
 use crate::msg::{DistribtionExecMsg, MembershipExecMsg};
 use crate::state::{
@@ -109,9 +109,10 @@ pub fn propose_member(
         msg: to_binary(&propose_msg)?,
         funds: vec![],
     };
+    let propose_msg = SubMsg::reply_on_success(propose_msg, PROPOSE_MEMBER_ID);
 
     let resp = Response::new()
-        .add_message(propose_msg)
+        .add_submessage(propose_msg)
         .add_attribute("action", "propose member")
         .add_attribute("sender", info.sender.as_str())
         .add_attribute("member", addr);

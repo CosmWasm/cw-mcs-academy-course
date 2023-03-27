@@ -20,7 +20,7 @@ pub fn initial_proxy_instantiated(
 
     let awaiting = AWAITING_INITIAL_RESPS.load(deps.storage)? - 1;
     if awaiting > 0 {
-        AWAITING_INITIAL_RESPS.save(deps.storage, &0)?;
+        AWAITING_INITIAL_RESPS.save(deps.storage, &awaiting)?;
 
         let resp = Response::new().add_attribute("proxy_addr", addr);
         return Ok(resp);
@@ -40,6 +40,31 @@ pub fn initial_proxy_instantiated(
         .collect::<StdResult<_>>()?;
 
     let data = InstantationData { members };
+    let resp = Response::new()
+        .add_attribute("proxy addr", addr.as_str())
+        .set_data(to_binary(&data)?);
+
+    Ok(resp)
+}
+
+pub fn proxy_instantiated(
+    deps: DepsMut,
+    reply: Result<SubMsgResponse, String>,
+) -> Result<Response, ContractError> {
+    let response = reply.map_err(StdError::generic_err)?;
+    let data = response.data.ok_or(ContractError::DataMissing)?;
+    let response = parse_instantiate_response_data(&data)?;
+    let addr = Addr::unchecked(response.contract_address);
+
+    let owner = proxy::state::OWNER.query(&deps.querier, addr.clone())?;
+
+    MEMBERS.save(deps.storage, &addr, &cosmwasm_std::Empty {})?;
+
+    let data = ProposeMemberData {
+        owner_addr: owner,
+        proxy_addr: addr.clone(),
+    };
+
     let resp = Response::new()
         .add_attribute("proxy addr", addr.as_str())
         .set_data(to_binary(&data)?);
