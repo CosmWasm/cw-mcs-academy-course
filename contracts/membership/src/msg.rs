@@ -1,4 +1,4 @@
-use cosmwasm_schema::cw_serde;
+use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, Decimal};
 
 #[cw_serde]
@@ -27,4 +27,16 @@ pub struct ProposeMemberData {
 #[cw_serde]
 pub struct InstantationData {
     pub members: Vec<ProposeMemberData>,
+}
+
+#[cw_serde]
+#[derive(QueryResponses)]
+pub enum QueryMsg {
+    #[returns(IsMemberResp)]
+    IsMember { addr: String },
+}
+
+#[cw_serde]
+pub struct IsMemberResp {
+    pub is_member: bool,
 }

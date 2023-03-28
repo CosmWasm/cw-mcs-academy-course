@@ -1,4 +1,7 @@
-use cosmwasm_std::{ensure, Decimal, DepsMut, Env, MessageInfo, Reply, Response};
+use cosmwasm_std::{
+    ensure, Addr, Binary, Decimal, Deps, DepsMut, Empty, Env, MessageInfo, Reply, Response,
+    StdResult,
+};
 
 use crate::error::ContractError;
 use crate::msg::{ExecMsg, InstantiateMsg};
@@ -13,6 +16,7 @@ const PROPOSE_MEMBER_ID: u64 = 2;
 pub fn instantiate(
     deps: DepsMut,
     env: Env,
+    _info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
     ensure!(
@@ -21,7 +25,8 @@ pub fn instantiate(
     );
 
     let owner = deps.api.addr_validate(&msg.owner)?;
-    let distribution_contract = deps.api.addr_validate(&msg.distribution_contract)?;
+    // let distribution_contract = deps.api.addr_validate(&msg.distribution_contract)?;
+    let distribution_contract = Addr::unchecked(msg.distribution_contract);
     let membership_contract = deps.api.addr_validate(&msg.membership_contract)?;
 
     OWNER.save(deps.storage, &owner)?;
@@ -59,6 +64,10 @@ pub fn execute(
         ProposeMember { addr } => exec::propose_member(deps, info, addr),
         UpdateWeight {} => exec::update_weight(deps, env, info),
     }
+}
+
+pub fn query(_deps: Deps, _env: Env, _msg: Empty) -> StdResult<Binary> {
+    Ok(Binary::default())
 }
 
 pub fn reply(deps: DepsMut, env: Env, reply: Reply) -> Result<Response, ContractError> {

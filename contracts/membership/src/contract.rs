@@ -1,14 +1,16 @@
 use cosmwasm_std::{
-    ensure, to_binary, Addr, DepsMut, Env, MessageInfo, Reply, Response, SubMsg, WasmMsg,
+    ensure, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdResult,
+    SubMsg, WasmMsg,
 };
 
 use crate::error::ContractError;
-use crate::msg::{ExecMsg, InstantiateMsg};
+use crate::msg::{ExecMsg, InstantiateMsg, QueryMsg};
 use crate::state::{Config, AWAITING_INITIAL_RESPS, CONFIG};
 
 use proxy::msg::InstantiateMsg as ProxyInstatiateMsg;
 
 mod exec;
+mod query;
 mod reply;
 
 const INITIAL_PROXY_INSTANTIATION_REPLY_ID: u64 = 1;
@@ -85,6 +87,14 @@ pub fn execute(
 
     match msg {
         ProposeMember { addr } => exec::propose_member(deps, env, info, addr),
+    }
+}
+
+pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
+    use QueryMsg::*;
+
+    match msg {
+        IsMember { addr } => query::is_member(deps, addr).and_then(|resp| to_binary(&resp)),
     }
 }
 
