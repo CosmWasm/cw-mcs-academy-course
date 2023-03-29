@@ -1,10 +1,11 @@
 use anyhow::Result as AnyResult;
+use common::msg::ProposeMemberData;
 use cosmwasm_std::{from_binary, Addr, Coin, Decimal};
 use cw_multi_test::{App, ContractWrapper, Executor};
 use cw_utils::parse_execute_response_data;
 
 use crate::contract::{execute, instantiate, query, reply};
-use crate::msg::{ExecMsg, InstantiateMsg, ProposeMemberData};
+use crate::msg::{ExecMsg, InstantiateMsg};
 
 #[derive(Clone, Copy, Debug)]
 pub struct CodeId(u64);

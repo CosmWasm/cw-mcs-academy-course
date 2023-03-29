@@ -1,5 +1,5 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{Addr, Decimal, Uint128};
+use cosmwasm_std::{Decimal, Uint128};
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -35,10 +35,4 @@ pub enum DistribtionExecMsg {
 #[cw_serde]
 pub enum MembershipExecMsg {
     ProposeMember { addr: String },
-}
-
-#[cw_serde]
-pub struct ProposeMemberData {
-    pub owner_addr: Addr,
-    pub proxy_addr: Addr,
 }

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::multitest::CodeId as MembershipId;
-use cosmwasm_std::Decimal;
+use cosmwasm_std::{Addr, Decimal};
 use cw_multi_test::App;
 use proxy::multitest::{CodeId as ProxyId, Contract as ProxyContract};
 
@@ -37,8 +37,8 @@ fn adding_member() {
 
     for member in data.members {
         proxies.insert(
-            member.owner_addr.into_string(),
-            ProxyContract::from_addr(member.proxy_addr),
+            member.owner_addr,
+            ProxyContract::from_addr(Addr::unchecked(member.proxy_addr)),
         );
     }
 

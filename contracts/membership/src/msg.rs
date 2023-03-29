@@ -1,5 +1,6 @@
+use common::msg::ProposeMemberData;
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use cosmwasm_std::{Addr, Decimal};
+use cosmwasm_std::Decimal;
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -16,12 +17,6 @@ pub struct InstantiateMsg {
 #[cw_serde]
 pub enum ExecMsg {
     ProposeMember { addr: String },
-}
-
-#[cw_serde]
-pub struct ProposeMemberData {
-    pub owner_addr: Addr,
-    pub proxy_addr: Addr,
 }
 
 #[cw_serde]
