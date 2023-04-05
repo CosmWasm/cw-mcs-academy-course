@@ -3,11 +3,12 @@ use cosmwasm_std::{
 };
 
 use crate::error::ContractError;
-use crate::state::{CONFIG, MEMBERS, PROPOSALS, VOTES};
+use crate::state::{CONFIG, PROPOSALS, VOTES};
 
 use proxy::msg::InstantiateMsg as ProxyInstatiateMsg;
 
 use super::PROXY_INSTANTIATION_REPLY_ID;
+use common::state::membership::MEMBERS;
 
 pub fn propose_member(
     deps: DepsMut,

@@ -1,7 +1,8 @@
 use cosmwasm_std::{Addr, Deps, StdResult};
 
 use crate::msg::IsMemberResp;
-use crate::state::MEMBERS;
+
+use common::state::membership::MEMBERS;
 
 pub fn is_member(deps: Deps, addr: String) -> StdResult<IsMemberResp> {
     let is_member = MEMBERS.has(deps.storage, &Addr::unchecked(addr));

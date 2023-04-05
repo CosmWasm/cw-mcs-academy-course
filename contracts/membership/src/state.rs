@@ -14,7 +14,6 @@ pub struct Config {
 }
 
 pub const CONFIG: Item<Config> = Item::new("config");
-pub const MEMBERS: Map<&Addr, Empty> = Map::new("members");
 // (member_voter, candidate)
 pub const VOTES: Map<(&Addr, &Addr), Empty> = Map::new("votes");
 pub const PROPOSALS: Map<&Addr, u64> = Map::new("proposals");

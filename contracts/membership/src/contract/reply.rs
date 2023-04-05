@@ -1,4 +1,5 @@
 use common::msg::ProposeMemberData;
+use common::state::membership::MEMBERS;
 use cosmwasm_std::{
     to_binary, Addr, DepsMut, Order, Response, StdError, StdResult, SubMsgResponse,
 };
@@ -6,7 +7,7 @@ use cw_utils::parse_instantiate_response_data;
 
 use crate::error::ContractError;
 use crate::msg::InstantationData;
-use crate::state::{AWAITING_INITIAL_RESPS, MEMBERS};
+use crate::state::AWAITING_INITIAL_RESPS;
 
 pub fn initial_proxy_instantiated(
     deps: DepsMut,
