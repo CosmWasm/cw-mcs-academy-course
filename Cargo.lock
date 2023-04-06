@@ -307,9 +307,11 @@ dependencies = [
 name = "distribution"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "common",
  "cosmwasm-schema",
  "cosmwasm-std",
+ "cw-multi-test",
  "cw-storage-plus",
  "thiserror",
 ]
@@ -489,6 +491,7 @@ dependencies = [
  "cw-multi-test",
  "cw-storage-plus",
  "cw-utils",
+ "distribution",
  "proxy",
  "schemars",
  "serde",

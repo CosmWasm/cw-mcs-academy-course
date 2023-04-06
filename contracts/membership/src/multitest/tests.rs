@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::multitest::CodeId as MembershipId;
 use cosmwasm_std::{Addr, Decimal};
 use cw_multi_test::App;
+use distribution::multitest::CodeId as DistributionId;
 use proxy::multitest::{CodeId as ProxyId, Contract as ProxyContract};
 
 #[test]
@@ -15,6 +16,7 @@ fn adding_member() {
     let members = ["member1", "member2"];
     let candidate = "candidate";
 
+    let distribution_id = DistributionId::store_code(&mut app);
     let proxy_id = ProxyId::store_code(&mut app);
     let membership_id = MembershipId::store_code(&mut app);
 
@@ -28,6 +30,7 @@ fn adding_member() {
             3600 * 24 * 30,
             2,
             proxy_id,
+            distribution_id,
             &members,
             "Membership",
         )

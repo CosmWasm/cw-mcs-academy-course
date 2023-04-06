@@ -1,4 +1,4 @@
-use cosmwasm_std::{DepsMut, Env, MessageInfo, Response};
+use cosmwasm_std::{Binary, Deps, DepsMut, Empty, Env, MessageInfo, Response, StdResult};
 
 use crate::error::ContractError;
 use crate::msg::{ExecMsg, InstantiateMsg};
@@ -16,7 +16,8 @@ pub fn instantiate(
 ) -> Result<Response, ContractError> {
     TOTAL_WEIGHT.save(deps.storage, &msg.total_weigth)?;
     MEMBERSHIP.save(deps.storage, &info.sender)?;
-    Ok(Response::new())
+    let resp = Response::new().set_data(msg.data);
+    Ok(resp)
 }
 
 pub fn execute(
@@ -32,4 +33,8 @@ pub fn execute(
         NewMember { addr, weight } => exec::new_member(deps, env, info, addr, weight),
         Withdraw { weight, diff } => exec::withdraw(deps, env, info, weight, diff),
     }
+}
+
+pub fn query(_deps: Deps, _env: Env, _msg: Empty) -> StdResult<Binary> {
+    Ok(Binary::default())
 }

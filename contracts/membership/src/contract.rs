@@ -5,9 +5,9 @@ use cosmwasm_std::{
 
 use crate::error::ContractError;
 use crate::msg::{ExecMsg, InstantiateMsg, QueryMsg};
-use crate::state::{Config, AWAITING_INITIAL_RESPS, CONFIG};
+use crate::state::{Config, CONFIG};
 
-use proxy::msg::InstantiateMsg as ProxyInstatiateMsg;
+use distribution::msg::InstantiateMsg as DistributionInstantiateMsg;
 
 mod exec;
 mod query;
@@ -15,6 +15,7 @@ mod reply;
 
 const INITIAL_PROXY_INSTANTIATION_REPLY_ID: u64 = 1;
 const PROXY_INSTANTIATION_REPLY_ID: u64 = 2;
+const DISTRIBUTION_INSTANTIATION_REPLY_ID: u64 = 3;
 
 pub fn instantiate(
     deps: DepsMut,
@@ -44,35 +45,23 @@ pub fn instantiate(
 
     CONFIG.save(deps.storage, &config)?;
 
-    let msgs: Vec<_> = msg
-        .initial_members
-        .into_iter()
-        .map(|member| -> Result<_, ContractError> {
-            let addr = deps.api.addr_validate(&member)?;
-            let init_msg = ProxyInstatiateMsg {
-                owner: addr.to_string(),
-                weight: msg.starting_weight,
-                denom: msg.denom.clone(),
-                direct_part: msg.direct_part,
-                distribution_contract: "".to_owned(),
-                membership_contract: env.contract.address.to_string(),
-                halftime: msg.halftime,
-            };
-            let msg = WasmMsg::Instantiate {
-                admin: Some(env.contract.address.to_string()),
-                code_id: msg.proxy_code_id,
-                msg: to_binary(&init_msg)?,
-                funds: vec![],
-                label: format!("{} Proxy", addr),
-            };
-            let msg = SubMsg::reply_on_success(msg, INITIAL_PROXY_INSTANTIATION_REPLY_ID);
+    let total_weigth = msg.starting_weight * msg.initial_members.len() as u64;
+    let members_data = to_binary(&msg.initial_members)?;
+    let instantiate_msg = DistributionInstantiateMsg {
+        total_weigth: total_weigth.into(),
+        data: members_data,
+    };
+    let instantiate_msg = WasmMsg::Instantiate {
+        admin: Some(env.contract.address.to_string()),
+        code_id: msg.distribution_code_id,
+        msg: to_binary(&instantiate_msg)?,
+        funds: vec![],
+        label: "Distribution".to_owned(),
+    };
+    let instantiate_msg =
+        SubMsg::reply_on_success(instantiate_msg, DISTRIBUTION_INSTANTIATION_REPLY_ID);
 
-            Ok(msg)
-        })
-        .collect::<Result<_, _>>()?;
-
-    AWAITING_INITIAL_RESPS.save(deps.storage, &(msgs.len() as _))?;
-    let resp = Response::new().add_submessages(msgs);
+    let resp = Response::new().add_submessage(instantiate_msg);
 
     Ok(resp)
 }
@@ -98,12 +87,15 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     }
 }
 
-pub fn reply(deps: DepsMut, _env: Env, reply: Reply) -> Result<Response, ContractError> {
+pub fn reply(deps: DepsMut, env: Env, reply: Reply) -> Result<Response, ContractError> {
     match reply.id {
         INITIAL_PROXY_INSTANTIATION_REPLY_ID => {
             reply::initial_proxy_instantiated(deps, reply.result.into_result())
         }
         PROXY_INSTANTIATION_REPLY_ID => reply::proxy_instantiated(deps, reply.result.into_result()),
+        DISTRIBUTION_INSTANTIATION_REPLY_ID => {
+            reply::distribution_instantiated(deps, env, reply.result.into_result())
+        }
         id => Err(ContractError::UnrecognizedReplyId(id)),
     }
 }
