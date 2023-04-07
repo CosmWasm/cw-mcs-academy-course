@@ -1,9 +1,10 @@
 use anyhow::Result as AnyResult;
+use common::msg::WithdrawableResp;
 use cosmwasm_std::{Addr, Binary, Coin, Uint128};
 use cw_multi_test::{App, ContractWrapper, Executor};
 
 use crate::contract::{execute, instantiate, query};
-use crate::msg::{ExecMsg, InstantiateMsg};
+use crate::msg::{ExecMsg, InstantiateMsg, QueryMsg};
 
 pub struct CodeId(u64);
 
@@ -80,6 +81,17 @@ impl Contract {
 
         app.execute_contract(Addr::unchecked(sender), self.0.clone(), &msg, &[])
             .map(|_| ())
+            .map_err(Into::into)
+    }
+
+    pub fn withdrawable(&self, app: &App, proxy: &str, weight: u64) -> AnyResult<WithdrawableResp> {
+        let msg = QueryMsg::Withdrawable {
+            proxy: proxy.to_owned(),
+            weight,
+        };
+
+        app.wrap()
+            .query_wasm_smart(self.0.clone(), &msg)
             .map_err(Into::into)
     }
 }

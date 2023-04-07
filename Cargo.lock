@@ -563,6 +563,7 @@ dependencies = [
  "cw-multi-test",
  "cw-storage-plus",
  "cw-utils",
+ "distribution",
  "schemars",
  "serde",
  "thiserror",

@@ -3,6 +3,7 @@ use cosmwasm_std::{Addr, Uint128};
 use cw_storage_plus::{Item, Map};
 
 #[cw_serde]
+#[derive(Default)]
 pub struct DenomCorrection {
     pub points_per_weight: Uint128,
     pub points_leftover: Uint128,
@@ -10,6 +11,7 @@ pub struct DenomCorrection {
 }
 
 #[cw_serde]
+#[derive(Default)]
 pub struct Correction {
     pub points_correction: i64,
     pub withdrawn_funds: Uint128,

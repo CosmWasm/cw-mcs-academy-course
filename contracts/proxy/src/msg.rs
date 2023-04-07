@@ -1,4 +1,5 @@
-use cosmwasm_schema::cw_serde;
+use common::msg::WithdrawableResp;
+use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Decimal, Uint128};
 
 #[cw_serde]
@@ -27,12 +28,8 @@ pub enum ExecMsg {
 }
 
 #[cw_serde]
-pub enum DistribtionExecMsg {
-    Distribute {},
-    Withdraw { weight: u64, diff: i64 },
-}
-
-#[cw_serde]
-pub enum MembershipExecMsg {
-    ProposeMember { addr: String },
+#[derive(QueryResponses)]
+pub enum QueryMsg {
+    #[returns(WithdrawableResp)]
+    Withdrawable {},
 }

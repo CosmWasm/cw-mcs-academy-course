@@ -21,6 +21,7 @@ cw-utils = "1.0.1"
 cw-multi-test = { version = "0.16.2", optional = true }
 anyhow = { version = "1.0.70", optional = true }
 common = { version = "0.1.0", path = "../../common" }
+distribution = { version = "0.1.0", path = "../distribution", features = ["library"] }
 
 [dev-dependencies]
 anyhow = "1.0.70"

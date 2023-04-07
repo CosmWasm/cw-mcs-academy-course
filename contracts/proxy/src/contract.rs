@@ -1,13 +1,14 @@
 use cosmwasm_std::{
-    ensure, Addr, Binary, Decimal, Deps, DepsMut, Empty, Env, MessageInfo, Reply, Response,
+    ensure, to_binary, Addr, Binary, Decimal, Deps, DepsMut, Env, MessageInfo, Reply, Response,
     StdResult,
 };
 
 use crate::error::ContractError;
-use crate::msg::{ExecMsg, InstantiateMsg};
+use crate::msg::{ExecMsg, InstantiateMsg, QueryMsg};
 use crate::state::{Config, CONFIG, DONATIONS, HALFTIME, LAST_UPDATED, OWNER, WEIGHT};
 
 mod exec;
+mod query;
 mod reply;
 
 const WITHDRAW_REPLY_ID: u64 = 1;
@@ -66,8 +67,12 @@ pub fn execute(
     }
 }
 
-pub fn query(_deps: Deps, _env: Env, _msg: Empty) -> StdResult<Binary> {
-    Ok(Binary::default())
+pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
+    use QueryMsg::*;
+
+    match msg {
+        Withdrawable {} => to_binary(&query::withdrawable(deps, env)?),
+    }
 }
 
 pub fn reply(deps: DepsMut, env: Env, reply: Reply) -> Result<Response, ContractError> {

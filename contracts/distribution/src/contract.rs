@@ -1,10 +1,11 @@
-use cosmwasm_std::{Binary, Deps, DepsMut, Empty, Env, MessageInfo, Response, StdResult};
+use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 
 use crate::error::ContractError;
-use crate::msg::{ExecMsg, InstantiateMsg};
+use crate::msg::{ExecMsg, InstantiateMsg, QueryMsg};
 use crate::state::{MEMBERSHIP, TOTAL_WEIGHT};
 
-pub mod exec;
+mod exec;
+mod query;
 
 pub const POINTS_SCALE: u128 = 4_000_000_000;
 
@@ -35,6 +36,12 @@ pub fn execute(
     }
 }
 
-pub fn query(_deps: Deps, _env: Env, _msg: Empty) -> StdResult<Binary> {
-    Ok(Binary::default())
+pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
+    use QueryMsg::*;
+
+    match msg {
+        Withdrawable { proxy, weight } => {
+            to_binary(&query::withdrawable(deps, env, proxy, weight)?)
+        }
+    }
 }

@@ -1,12 +1,13 @@
+use common::msg::membership::ExecMsg as MembershipExecMsg;
 use cosmwasm_std::{
     coins, ensure, to_binary, DepsMut, Env, MessageInfo, Response, StdResult, SubMsg, Uint128,
     WasmMsg,
 };
 use cw_utils::must_pay;
+use distribution::msg::ExecMsg as DistribtionExecMsg;
 
 use crate::contract::{PROPOSE_MEMBER_ID, WITHDRAW_REPLY_ID};
 use crate::error::ContractError;
-use crate::msg::{DistribtionExecMsg, MembershipExecMsg};
 use crate::state::{
     WithdrawalData, CONFIG, DONATIONS, HALFTIME, LAST_UPDATED, OWNER, PENDING_WITHDRAWAL, WEIGHT,
 };

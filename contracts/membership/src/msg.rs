@@ -14,10 +14,7 @@ pub struct InstantiateMsg {
     pub initial_members: Vec<String>,
 }
 
-#[cw_serde]
-pub enum ExecMsg {
-    ProposeMember { addr: String },
-}
+pub use common::msg::membership::ExecMsg;
 
 #[cw_serde]
 pub struct InstantationData {

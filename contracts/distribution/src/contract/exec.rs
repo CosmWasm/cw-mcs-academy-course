@@ -12,7 +12,9 @@ pub fn distribute(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response
 
     let total_weight = TOTAL_WEIGHT.load(deps.storage)?.u128();
     for coin in info.funds {
-        let mut correction = DENOM_CORRECTION.load(deps.storage, &coin.denom)?;
+        let mut correction = DENOM_CORRECTION
+            .may_load(deps.storage, &coin.denom)?
+            .unwrap_or_default();
 
         let balance = deps
             .querier
@@ -92,14 +94,18 @@ pub fn withdraw(
     let withdraw: Vec<_> = funds
         .into_iter()
         .map(|mut coin| -> Result<_, ContractError> {
-            let mut denom_correction = DENOM_CORRECTION.load(deps.storage, &coin.denom)?;
-            let mut correction = CORRECTION.load(deps.storage, (&info.sender, &coin.denom))?;
+            let mut denom_correction = DENOM_CORRECTION
+                .may_load(deps.storage, &coin.denom)?
+                .unwrap_or_default();
+            let mut correction = CORRECTION
+                .may_load(deps.storage, (&info.sender, &coin.denom))?
+                .unwrap_or_default();
 
             let points = (denom_correction.points_per_weight.u128() * weight as u128) as i128
                 + correction.points_correction as i128;
             let points = points as u128;
 
-            let amount = points / POINTS_SCALE;
+            let amount = points / POINTS_SCALE - correction.withdrawn_funds.u128();
 
             denom_correction.withdrawable_total -= Uint128::new(amount);
             correction.withdrawn_funds += Uint128::new(amount);
@@ -108,7 +114,7 @@ pub fn withdraw(
             DENOM_CORRECTION.save(deps.storage, &coin.denom, &denom_correction)?;
             CORRECTION.save(deps.storage, (&info.sender, &coin.denom), &correction)?;
 
-            coin.amount = amount.into();
+            coin.amount = Uint128::new(amount);
 
             Ok(coin)
         })

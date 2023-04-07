@@ -1,11 +1,11 @@
 use anyhow::Result as AnyResult;
-use common::msg::ProposeMemberData;
+use common::msg::{ProposeMemberData, WithdrawableResp};
 use cosmwasm_std::{from_binary, Addr, Coin, Decimal};
 use cw_multi_test::{App, ContractWrapper, Executor};
 use cw_utils::parse_execute_response_data;
 
 use crate::contract::{execute, instantiate, query, reply};
-use crate::msg::{ExecMsg, InstantiateMsg};
+use crate::msg::{ExecMsg, InstantiateMsg, QueryMsg};
 
 #[derive(Clone, Copy, Debug)]
 pub struct CodeId(u64);
@@ -155,5 +155,11 @@ impl Contract {
 
         app.execute_contract(Addr::unchecked(sender), self.0.clone(), &msg, &[])?;
         Ok(())
+    }
+
+    pub fn withdrawable(&self, app: &App) -> AnyResult<WithdrawableResp> {
+        app.wrap()
+            .query_wasm_smart(self.0.clone(), &QueryMsg::Withdrawable {})
+            .map_err(Into::into)
     }
 }
