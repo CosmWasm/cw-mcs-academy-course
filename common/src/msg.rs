@@ -1,4 +1,4 @@
-use cosmwasm_schema::cw_serde;
+use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::Coin;
 
 pub mod membership {
@@ -7,6 +7,18 @@ pub mod membership {
     #[cw_serde]
     pub enum ExecMsg {
         ProposeMember { addr: String },
+    }
+
+    #[cw_serde]
+    #[derive(QueryResponses)]
+    pub enum QueryMsg {
+        #[returns(IsMemberResp)]
+        IsMember { addr: String },
+    }
+
+    #[cw_serde]
+    pub struct IsMemberResp {
+        pub is_member: bool,
     }
 }
 

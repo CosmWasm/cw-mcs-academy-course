@@ -1,5 +1,4 @@
 use common::msg::ProposeMemberData;
-use common::state::membership::MEMBERS;
 use cosmwasm_std::{
     from_binary, to_binary, Addr, DepsMut, Env, Order, Response, StdError, StdResult, SubMsg,
     SubMsgResponse, WasmMsg,
@@ -10,7 +9,7 @@ use proxy::msg::InstantiateMsg as ProxyInstatiateMsg;
 
 use crate::error::ContractError;
 use crate::msg::InstantationData;
-use crate::state::{AWAITING_INITIAL_RESPS, CONFIG};
+use crate::state::{members, AWAITING_INITIAL_RESPS, CONFIG};
 
 use super::INITIAL_PROXY_INSTANTIATION_REPLY_ID;
 
@@ -23,7 +22,8 @@ pub fn initial_proxy_instantiated(
     let response = parse_instantiate_response_data(&data)?;
     let addr = Addr::unchecked(response.contract_address);
 
-    MEMBERS.save(deps.storage, &addr, &cosmwasm_std::Empty {})?;
+    let owner = proxy::state::OWNER.query(&deps.querier, addr.clone())?;
+    members().save(deps.storage, &addr, &owner)?;
 
     let awaiting = AWAITING_INITIAL_RESPS.load(deps.storage)? - 1;
     if awaiting > 0 {
@@ -33,11 +33,10 @@ pub fn initial_proxy_instantiated(
         return Ok(resp);
     }
 
-    let members: Vec<_> = MEMBERS
+    let members: Vec<_> = members()
         .range(deps.storage, None, None, Order::Ascending)
         .map(|member| -> StdResult<_> {
-            let (member, _) = member?;
-            let owner = proxy::state::OWNER.query(&deps.querier, member.clone())?;
+            let (member, owner) = member?;
             let data = ProposeMemberData {
                 owner_addr: owner.into(),
                 proxy_addr: member.into(),
@@ -64,8 +63,7 @@ pub fn proxy_instantiated(
     let addr = Addr::unchecked(response.contract_address);
 
     let owner = proxy::state::OWNER.query(&deps.querier, addr.clone())?;
-
-    MEMBERS.save(deps.storage, &addr, &cosmwasm_std::Empty {})?;
+    members().save(deps.storage, &addr, &owner)?;
 
     let data = ProposeMemberData {
         owner_addr: owner.into(),

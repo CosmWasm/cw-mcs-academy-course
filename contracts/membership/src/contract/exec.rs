@@ -1,14 +1,13 @@
 use cosmwasm_std::{
-    ensure, to_binary, DepsMut, Empty, Env, MessageInfo, Order, Response, SubMsg, WasmMsg,
+    ensure, to_binary, DepsMut, Empty, Env, MessageInfo, Response, SubMsg, WasmMsg,
 };
 
 use crate::error::ContractError;
-use crate::state::{CONFIG, PROPOSALS, VOTES};
+use crate::state::{members, CONFIG, PROPOSALS, VOTES};
 
 use proxy::msg::InstantiateMsg as ProxyInstatiateMsg;
 
 use super::PROXY_INSTANTIATION_REPLY_ID;
-use common::state::membership::MEMBERS;
 
 pub fn propose_member(
     deps: DepsMut,
@@ -17,19 +16,20 @@ pub fn propose_member(
     addr: String,
 ) -> Result<Response, ContractError> {
     ensure!(
-        MEMBERS.has(deps.storage, &info.sender),
+        members().has(deps.storage, &info.sender),
         ContractError::Unauthorized
     );
 
     let addr = deps.api.addr_validate(&addr)?;
 
-    for member in MEMBERS.range(deps.storage, None, None, Order::Ascending) {
-        let (member, _) = member?;
-        ensure!(
-            proxy::state::OWNER.query(&deps.querier, member)? != addr,
-            ContractError::AlreadyAMember
-        );
-    }
+    ensure!(
+        members()
+            .idx
+            .owner
+            .item(deps.storage, addr.clone())?
+            .is_none(),
+        ContractError::AlreadyAMember
+    );
 
     ensure!(
         !VOTES.has(deps.storage, (&info.sender, &addr)),

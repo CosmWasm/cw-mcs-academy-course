@@ -1,5 +1,5 @@
 use common::msg::ProposeMemberData;
-use cosmwasm_schema::{cw_serde, QueryResponses};
+use cosmwasm_schema::cw_serde;
 use cosmwasm_std::Decimal;
 
 #[cw_serde]
@@ -14,21 +14,9 @@ pub struct InstantiateMsg {
     pub initial_members: Vec<String>,
 }
 
-pub use common::msg::membership::ExecMsg;
+pub use common::msg::membership::*;
 
 #[cw_serde]
 pub struct InstantationData {
     pub members: Vec<ProposeMemberData>,
-}
-
-#[cw_serde]
-#[derive(QueryResponses)]
-pub enum QueryMsg {
-    #[returns(IsMemberResp)]
-    IsMember { addr: String },
-}
-
-#[cw_serde]
-pub struct IsMemberResp {
-    pub is_member: bool,
 }

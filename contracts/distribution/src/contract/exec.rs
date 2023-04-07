@@ -2,10 +2,11 @@ use cosmwasm_std::{
     ensure, Addr, BankMsg, DepsMut, Env, Event, MessageInfo, Order, Response, StdResult, Uint128,
 };
 
+use common::msg::membership::{IsMemberResp, QueryMsg as MembershipQueryMsg};
+
 use super::POINTS_SCALE;
 use crate::error::ContractError;
 use crate::state::{Correction, CORRECTION, DENOM_CORRECTION, MEMBERSHIP, TOTAL_WEIGHT};
-use common::state::membership::MEMBERS;
 
 pub fn distribute(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {
     let mut resp = Response::new().add_attribute("action", "distribute_tokens");
@@ -86,9 +87,14 @@ pub fn withdraw(
     diff: i64,
 ) -> Result<Response, ContractError> {
     let membership = MEMBERSHIP.load(deps.storage)?;
-    MEMBERS
-        .query(&deps.querier, membership, &info.sender)?
-        .ok_or(ContractError::Unauthorized)?;
+    let is_member: IsMemberResp = deps.querier.query_wasm_smart(
+        membership,
+        &MembershipQueryMsg::IsMember {
+            addr: info.sender.to_string(),
+        },
+    )?;
+
+    ensure!(is_member.is_member, ContractError::Unauthorized);
 
     let funds = deps.querier.query_all_balances(env.contract.address)?;
     let withdraw: Vec<_> = funds
